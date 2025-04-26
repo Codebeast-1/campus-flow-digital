@@ -2,7 +2,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/hooks/use-toast';
-import { AppContextType, Request, RequestStatus, User, UserRole } from '@/types';
+import { AppContextType, Request, RequestStatus, User, UserRole, RequestType } from '@/types';
 
 const AppContext = createContext<AppContextType | null>(null);
 
@@ -15,12 +15,12 @@ export const useAppContext = () => {
 };
 
 // Mock data for initial requests
-const mockRequests = [
+const mockRequests: Request[] = [
   {
     id: '1',
     title: 'Main Hall Booking for Graduation Ceremony',
     description: 'Need to book the Main Hall for the upcoming graduation ceremony.',
-    type: 'room_booking',
+    type: 'room_booking' as RequestType,
     requestor: {
       id: '101',
       name: 'Dr. Jane Smith',
@@ -58,7 +58,7 @@ const mockRequests = [
     id: '2',
     title: 'Science Building Equipment Request',
     description: 'Request for new microscopes for the biology lab.',
-    type: 'equipment_request',
+    type: 'equipment_request' as RequestType,
     requestor: {
       id: '102',
       name: 'Prof. Robert Chen',
@@ -86,7 +86,7 @@ const mockRequests = [
     id: '3',
     title: 'Computer Lab Access Request',
     description: 'Need extended hours access to the Computer Science lab for project work',
-    type: 'room_booking',
+    type: 'room_booking' as RequestType,
     requestor: {
       id: '103',
       name: 'Lisa Johnson',
