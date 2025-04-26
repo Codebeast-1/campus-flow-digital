@@ -4,42 +4,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RequestCard } from "@/components/RequestCard";
 import { StatCard } from "@/components/StatCard";
-import { RecentActivity } from "@/components/RecentActivity";
 import { useNavigate } from "react-router-dom";
-import { FileText, CheckCircle, Clock, PlusCircle, Search } from "lucide-react";
-import FacultyDashboard from "./FacultyDashboard";
-import StudentDashboard from "./StudentDashboard";
+import { FileText, Clock, CheckCircle, CalendarDays, PlusCircle, Search } from "lucide-react";
 
-export default function Dashboard() {
+export default function StudentDashboard() {
   const { requests, currentUser } = useAppContext();
   const navigate = useNavigate();
   
-  // Render role-specific dashboards
-  if (currentUser?.role === 'faculty') {
-    return <FacultyDashboard />;
-  }
+  // Filter requests submitted by this student
+  const studentRequests = requests.filter(r => r.requestor.id === currentUser?.id);
   
-  if (currentUser?.role === 'student') {
-    return <StudentDashboard />;
-  }
-  
-  // Admin dashboard (default)
   const stats = {
-    pending: requests.filter(r => r.status === 'pending').length,
-    approved: requests.filter(r => r.status === 'approved').length,
-    inProgress: requests.filter(r => r.status === 'in-progress').length,
-    total: requests.length
+    pending: studentRequests.filter(r => r.status === 'pending').length,
+    approved: studentRequests.filter(r => r.status === 'approved').length,
+    rejected: studentRequests.filter(r => r.status === 'rejected').length,
+    total: studentRequests.length
   };
   
-  // Get the most recent requests (up to 3)
-  const recentRequests = [...requests]
+  // Get the most recent student requests (up to 3)
+  const recentRequests = [...studentRequests]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 3);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Student Dashboard</h1>
         <div className="flex items-center gap-2">
           <div className="relative w-full md:w-60">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
@@ -51,7 +41,7 @@ export default function Dashboard() {
           </div>
           <Button 
             onClick={() => navigate('/new-request')}
-            className="hover:translate-y-[-2px] transition-all" 
+            className="hover:translate-y-[-2px] transition-all"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             New Request
@@ -63,22 +53,15 @@ export default function Dashboard() {
         <StatCard
           title="Total Requests"
           value={stats.total}
-          description="All-time submissions"
+          description="All your submissions"
           icon={<FileText className="h-4 w-4 text-gray-500" />}
           className="hover:shadow-md transition-all"
         />
         <StatCard
           title="Pending"
           value={stats.pending}
-          description="Awaiting submission"
+          description="Awaiting approval"
           icon={<Clock className="h-4 w-4 text-campus-pending" />}
-          className="hover:shadow-md transition-all"
-        />
-        <StatCard
-          title="In Progress"
-          value={stats.inProgress}
-          description="Under review"
-          icon={<FileText className="h-4 w-4 text-campus-blue" />}
           className="hover:shadow-md transition-all"
         />
         <StatCard
@@ -88,12 +71,19 @@ export default function Dashboard() {
           icon={<CheckCircle className="h-4 w-4 text-campus-success" />}
           className="hover:shadow-md transition-all"
         />
+        <StatCard
+          title="Rejected"
+          value={stats.rejected}
+          description="Not approved"
+          icon={<CalendarDays className="h-4 w-4 text-campus-danger" />}
+          className="hover:shadow-md transition-all"
+        />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-7">
-        <div className="md:col-span-5 space-y-4">
+      <div className="grid gap-6 md:grid-cols-1">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Requests</h2>
+            <h2 className="text-lg font-semibold">Your Recent Requests</h2>
             <Button 
               variant="ghost" 
               className="text-sm hover:scale-105 transition-transform" 
@@ -102,7 +92,7 @@ export default function Dashboard() {
               View all
             </Button>
           </div>
-          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {recentRequests.map((request) => (
               <RequestCard 
                 key={request.id} 
@@ -127,9 +117,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-        </div>
-        <div className="md:col-span-2">
-          <RecentActivity requests={requests} />
         </div>
       </div>
     </div>

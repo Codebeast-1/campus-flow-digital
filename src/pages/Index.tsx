@@ -1,8 +1,18 @@
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAppContext } from "@/context/AppContext";
 
 const Index = () => {
-  return <Navigate to="/" replace />;
+  const { isAuthenticated } = useAppContext();
+  const location = useLocation();
+
+  return (
+    <Navigate 
+      to={isAuthenticated ? "/" : "/auth"} 
+      state={{ from: location }} 
+      replace 
+    />
+  );
 };
 
 export default Index;

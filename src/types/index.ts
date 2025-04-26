@@ -5,6 +5,8 @@ export type Department = 'IT' | 'Facilities' | 'Student Affairs' | 'Finance' | '
 
 export type RequestType = 'room_booking' | 'event_hosting' | 'equipment_request' | 'maintenance';
 
+export type UserRole = 'admin' | 'faculty' | 'student';
+
 export interface Approver {
   id: string;
   name: string;
@@ -40,17 +42,24 @@ export interface Request {
   createdAt: Date;
   updatedAt: Date;
   status: RequestStatus;
+  facultyName?: string; // For student requests that need faculty approval
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  department: string;
 }
 
 export interface AppContextType {
   requests: Request[];
   addRequest: (request: Omit<Request, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => void;
   updateRequestStatus: (requestId: string, status: RequestStatus, stepIndex?: number, notes?: string) => void;
-  currentUser: {
-    id: string;
-    name: string;
-    email: string;
-    role: 'admin' | 'user';
-    department: Department;
-  } | null;
+  currentUser: User | null;
+  isAuthenticated: boolean;
+  loginUser: (email: string, password: string, role: UserRole) => void;
+  logoutUser: () => void;
+  signupUser: (userData: { name: string; email: string; password: string; role: UserRole; department: string }) => void;
 }

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -14,13 +14,32 @@ import {
   SidebarMenuButton,
   SidebarGroup,
 } from "@/components/ui/sidebar";
-import { Bell, Calendar, Home, User, FileText, Settings } from "lucide-react";
+import { Bell, Calendar, Home, User, FileText, Settings, LogOut, GraduationCap, Building } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 
 export default function AppLayout() {
   const location = useLocation();
-  const { currentUser } = useAppContext();
+  const navigate = useNavigate();
+  const { currentUser, logoutUser } = useAppContext();
   const [notifications] = useState(2); // Mock notification count
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate("/auth");
+  };
+
+  const getRoleIcon = () => {
+    switch (currentUser?.role) {
+      case "admin":
+        return <Building className="h-5 w-5 text-white" />;
+      case "faculty":
+        return <User className="h-5 w-5 text-white" />;
+      case "student":
+        return <GraduationCap className="h-5 w-5 text-white" />;
+      default:
+        return <User className="h-5 w-5 text-white" />;
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -43,7 +62,7 @@ export default function AppLayout() {
                   <SidebarMenuButton asChild>
                     <Link
                       to="/"
-                      className={location.pathname === "/" ? "text-campus-blue font-medium" : ""}
+                      className={`hover:scale-105 transition-all ${location.pathname === "/" ? "text-campus-blue font-medium" : ""}`}
                     >
                       <Home className="h-5 w-5" />
                       <span>Dashboard</span>
@@ -54,34 +73,39 @@ export default function AppLayout() {
                   <SidebarMenuButton asChild>
                     <Link
                       to="/requests"
-                      className={location.pathname === "/requests" ? "text-campus-blue font-medium" : ""}
+                      className={`hover:scale-105 transition-all ${location.pathname === "/requests" ? "text-campus-blue font-medium" : ""}`}
                     >
                       <FileText className="h-5 w-5" />
                       <span>My Requests</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      to="/approvals"
-                      className={location.pathname === "/approvals" ? "text-campus-blue font-medium" : ""}
-                    >
-                      <Calendar className="h-5 w-5" />
-                      <span>Pending Approvals</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                
+                {/* Only show for admin and faculty */}
+                {(currentUser?.role === "admin" || currentUser?.role === "faculty") && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        to="/approvals"
+                        className={`hover:scale-105 transition-all ${location.pathname === "/approvals" ? "text-campus-blue font-medium" : ""}`}
+                      >
+                        <Calendar className="h-5 w-5" />
+                        <span>Pending Approvals</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <Link
                       to="/notifications"
-                      className={location.pathname === "/notifications" ? "text-campus-blue font-medium" : ""}
+                      className={`hover:scale-105 transition-all ${location.pathname === "/notifications" ? "text-campus-blue font-medium" : ""}`}
                     >
                       <div className="relative">
                         <Bell className="h-5 w-5" />
                         {notifications > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-campus-teal text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                          <span className="absolute -top-1 -right-1 bg-campus-teal text-white text-xs rounded-full h-4 w-4 flex items-center justify-center animate-pulse">
                             {notifications}
                           </span>
                         )}
@@ -97,20 +121,28 @@ export default function AppLayout() {
             <div className="p-4">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-campus-blue-light flex items-center justify-center">
-                  <User className="h-5 w-5 text-white" />
+                  {getRoleIcon()}
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <p className="text-sm font-medium leading-none truncate">
                     {currentUser?.name || "User"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {currentUser?.department || "Department"}
+                    {currentUser?.role.charAt(0).toUpperCase() + currentUser?.role.slice(1)} · {currentUser?.department || "Department"}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/settings">
                     <Settings className="h-4 w-4" />
                   </Link>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-campus-danger hover:text-white hover:bg-campus-danger transition-colors"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -120,7 +152,12 @@ export default function AppLayout() {
           <div className="flex items-center h-14 border-b px-4 lg:px-6">
             <SidebarTrigger />
             <div className="ml-auto flex items-center space-x-4">
-              <Button variant="outline">Help</Button>
+              <Button 
+                variant="outline"
+                className="hover:scale-105 transition-transform"
+              >
+                Help
+              </Button>
             </div>
           </div>
           <main className="flex-1 p-4 lg:p-6">
