@@ -1,4 +1,3 @@
-
 import { useAppContext } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,7 @@ import { RequestCard } from "@/components/RequestCard";
 import { StatCard } from "@/components/StatCard";
 import { RecentActivity } from "@/components/RecentActivity";
 import { useNavigate } from "react-router-dom";
-import { FileText, CheckCircle, Clock, PlusCircle, Search } from "lucide-react";
+import { FileText, CheckCircle, Clock, PlusCircle, Search, ArrowRight } from "lucide-react";
 import FacultyDashboard from "./FacultyDashboard";
 import StudentDashboard from "./StudentDashboard";
 
@@ -14,7 +13,6 @@ export default function Dashboard() {
   const { requests, currentUser } = useAppContext();
   const navigate = useNavigate();
   
-  // Render role-specific dashboards
   if (currentUser?.role === 'faculty') {
     return <FacultyDashboard />;
   }
@@ -23,7 +21,6 @@ export default function Dashboard() {
     return <StudentDashboard />;
   }
   
-  // Admin dashboard (default)
   const stats = {
     pending: requests.filter(r => r.status === 'pending').length,
     approved: requests.filter(r => r.status === 'approved').length,
@@ -31,7 +28,6 @@ export default function Dashboard() {
     total: requests.length
   };
   
-  // Get the most recent requests (up to 3)
   const recentRequests = [...requests]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 3);
@@ -100,6 +96,7 @@ export default function Dashboard() {
               onClick={() => navigate('/requests')}
             >
               View all
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">

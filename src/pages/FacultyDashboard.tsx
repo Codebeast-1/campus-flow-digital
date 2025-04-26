@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { StatCard } from "@/components/StatCard";
 import { useNavigate } from "react-router-dom";
 import { 
   FileText, Calendar, CheckCircle, Clock, PlusCircle, 
-  Search, GraduationCap, Bell, CheckCheck 
+  Search, GraduationCap, Bell, CheckCheck, ArrowRight 
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Request } from "@/types";
