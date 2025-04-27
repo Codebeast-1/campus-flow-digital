@@ -1,305 +1,242 @@
 
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppContext } from "@/context/AppContext";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { useAppContext } from '@/context/AppContext';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RequestType, Department } from '@/types';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export function RequestForm() {
-  const navigate = useNavigate();
   const { addRequest, currentUser } = useAppContext();
-  const [loading, setLoading] = useState(false);
-
-  const form = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      type: "",
-      location: "",
-      startDate: undefined,
-      endDate: undefined,
-      facultyName: "", // Added for student requests
-    },
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    type: '' as RequestType,
+    location: '',
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
   });
 
-  const onSubmit = async (values: any) => {
-    setLoading(true);
+  // Update form data
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle select change
+  const handleSelectChange = (name: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Generate approval steps based on request type
+  const generateApprovalSteps = (type: RequestType) => {
+    // Default departments that need to approve different request types
+    const stepDepartments: Record<RequestType, Department[]> = {
+      'room_booking': ['Facilities', 'IT', 'Academic Affairs'],
+      'event_hosting': ['Student Affairs', 'Facilities', 'IT'],
+      'equipment_request': ['Finance', 'Academic Affairs'],
+      'maintenance': ['Facilities'],
+    };
+
+    const departments = stepDepartments[type] || [];
+    
+    return departments.map((department) => ({
+      id: crypto.randomUUID(),
+      department,
+      status: 'pending' as const,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
     try {
+      if (!currentUser) return;
+      
+      const steps = generateApprovalSteps(formData.type);
+      
       addRequest({
-        title: values.title,
-        description: values.description,
-        type: values.type as any,
-        location: values.location,
-        startDate: values.startDate,
-        endDate: values.endDate,
+        ...formData,
         requestor: {
-          id: currentUser?.id || "",
-          name: currentUser?.name || "",
-          email: currentUser?.email || "",
-          department: currentUser?.department || "",
+          id: currentUser.id,
+          name: currentUser.name,
+          email: currentUser.email,
+          department: currentUser.department,
         },
-        facultyName: currentUser?.role === 'student' ? values.facultyName : undefined,
+        steps,
         currentStep: 0,
-        steps: [
-          {
-            id: "",
-            department: "Facilities",
-            status: "pending",
-          },
-        ],
       });
-      navigate("/requests");
+      
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        type: '' as RequestType,
+        location: '',
+        startDate: undefined,
+        endDate: undefined,
+      });
+      
     } catch (error) {
-      console.error("Error submitting request:", error);
+      console.error('Error submitting request:', error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Show faculty field only for students
-  const isStudent = currentUser?.role === 'student';
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="title"
-            rules={{ required: "Title is required" }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter request title" 
-                    {...field} 
-                    className="hover:border-campus-blue transition-colors"
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>New Request</CardTitle>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Request Title</Label>
+            <Input 
+              id="title" 
+              name="title" 
+              value={formData.title} 
+              onChange={handleChange} 
+              placeholder="Enter a title for your request"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="type">Request Type</Label>
+            <Select
+              value={formData.type}
+              onValueChange={(value) => handleSelectChange('type', value)}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select request type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="room_booking">Room Booking</SelectItem>
+                <SelectItem value="event_hosting">Event Hosting</SelectItem>
+                <SelectItem value="equipment_request">Equipment Request</SelectItem>
+                <SelectItem value="maintenance">Maintenance</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description" 
+              name="description" 
+              value={formData.description} 
+              onChange={handleChange} 
+              placeholder="Provide details about your request"
+              rows={4}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input 
+              id="location" 
+              name="location" 
+              value={formData.location} 
+              onChange={handleChange} 
+              placeholder="Enter location (if applicable)"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.startDate ? (
+                      format(formData.startDate, "PPP")
+                    ) : (
+                      <span>Select date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.startDate}
+                    onSelect={(date) => 
+                      setFormData(prev => ({ ...prev, startDate: date }))
+                    }
+                    initialFocus
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="type"
-            rules={{ required: "Request type is required" }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Request Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="hover:border-campus-blue transition-colors">
-                      <SelectValue placeholder="Select request type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="room_booking">Room Booking</SelectItem>
-                    <SelectItem value="event_hosting">Event Hosting</SelectItem>
-                    <SelectItem value="equipment_request">
-                      Equipment Request
-                    </SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="description"
-          rules={{ required: "Description is required" }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter detailed description"
-                  className="min-h-[120px] hover:border-campus-blue transition-colors"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location (if applicable)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Enter location" 
-                  {...field} 
-                  className="hover:border-campus-blue transition-colors"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {isStudent && (
-          <FormField
-            control={form.control}
-            name="facultyName"
-            rules={{ required: currentUser?.role === 'student' ? "Faculty name is required" : false }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Faculty Name</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter faculty member's name" 
-                    {...field} 
-                    className="hover:border-campus-blue transition-colors"
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>End Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.endDate ? (
+                      format(formData.endDate, "PPP")
+                    ) : (
+                      <span>Select date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.endDate}
+                    onSelect={(date) => 
+                      setFormData(prev => ({ ...prev, endDate: date }))
+                    }
+                    initialFocus
+                    disabled={(date) => 
+                      formData.startDate ? date < formData.startDate : false
+                    }
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Start Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal hover:border-campus-blue transition-colors",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(new Date(field.value), "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date()
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>End Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal hover:border-campus-blue transition-colors",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(new Date(field.value), "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date <
-                        (form.getValues("startDate") || new Date())
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex justify-end space-x-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="hover:scale-105 transition-transform"
-          >
-            Cancel
-          </Button>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
           <Button 
             type="submit" 
-            disabled={loading}
-            className="hover:translate-y-[-2px] transition-all"
+            className="w-full"
+            disabled={isSubmitting || !formData.title || !formData.type || !formData.description}
           >
-            {loading ? "Submitting..." : "Submit Request"}
+            {isSubmitting ? 'Submitting...' : 'Submit Request'}
           </Button>
-        </div>
+        </CardFooter>
       </form>
-    </Form>
+    </Card>
   );
 }

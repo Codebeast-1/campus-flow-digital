@@ -1,3 +1,4 @@
+
 import { Request } from '@/types';
 import { StatusBadge } from './StatusBadge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -7,10 +8,9 @@ import { format } from 'date-fns';
 interface RequestCardProps {
   request: Request;
   onClick?: () => void;
-  className?: string;  // Added optional className prop
 }
 
-export function RequestCard({ request, onClick, className }: RequestCardProps) {
+export function RequestCard({ request, onClick }: RequestCardProps) {
   const formatDate = (date: Date) => {
     return format(new Date(date), 'MMM dd, yyyy');
   };
@@ -24,7 +24,7 @@ export function RequestCard({ request, onClick, className }: RequestCardProps) {
 
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow cursor-pointer ${className}`} 
+      className="hover:shadow-md transition-shadow cursor-pointer" 
       onClick={onClick}
     >
       <CardHeader className="pb-2">
