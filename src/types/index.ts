@@ -1,4 +1,3 @@
-
 export type UserRole = 'admin' | 'faculty' | 'student';
 export type RequestType = 'room_booking' | 'event_hosting' | 'equipment_request' | 'maintenance';
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'in-progress';
@@ -63,4 +62,6 @@ export interface AppContextType {
   loginUser: (email: string, password: string, role: UserRole) => void;
   logoutUser: () => void;
   signupUser: (userData: { name: string; email: string; password: string; role: UserRole; department: string }) => void;
+  redirectPath: string | null;
+  setRedirectPath: React.Dispatch<React.SetStateAction<string | null>>;
 }

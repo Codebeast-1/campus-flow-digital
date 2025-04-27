@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,7 @@ import { GraduationCap, User, Building, ArrowRight } from "lucide-react";
 export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { loginUser, signupUser } = useAppContext();
+  const { loginUser, signupUser, redirectPath, setRedirectPath } = useAppContext();
   const [activeTab, setActiveTab] = useState("login");
   const [selectedRole, setSelectedRole] = useState<UserRole>("student");
   
@@ -31,6 +30,13 @@ export default function Auth() {
     department: ""
   });
 
+  useEffect(() => {
+    if (redirectPath) {
+      navigate(redirectPath);
+      setRedirectPath(null);
+    }
+  }, [redirectPath, navigate, setRedirectPath]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginData.email || !loginData.password) {
@@ -43,7 +49,6 @@ export default function Auth() {
     }
     
     loginUser(loginData.email, loginData.password, selectedRole);
-    navigate("/");
   };
 
   const handleSignup = (e: React.FormEvent) => {

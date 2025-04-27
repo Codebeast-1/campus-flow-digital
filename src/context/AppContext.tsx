@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/hooks/use-toast';
@@ -137,6 +138,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [requests, setRequests] = useState<Request[]>(mockRequests);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   // Check for stored user credentials on load
   useEffect(() => {
@@ -156,19 +158,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsAuthenticated(true);
       localStorage.setItem('campusflow_user', JSON.stringify(user));
       
-      // Route to specific dashboard based on user role
+      // Set redirect path based on user role
       switch(user.role) {
         case 'student':
-          navigate('/student-dashboard');
+          setRedirectPath('/student-dashboard');
           break;
         case 'faculty':
-          navigate('/faculty-dashboard');
+          setRedirectPath('/faculty-dashboard');
           break;
         case 'admin':
-          navigate('/dashboard');
+          setRedirectPath('/dashboard');
           break;
         default:
-          navigate('/dashboard');
+          setRedirectPath('/dashboard');
       }
       
       toast({
@@ -291,7 +293,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isAuthenticated,
     loginUser,
     logoutUser,
-    signupUser
+    signupUser,
+    redirectPath,
+    setRedirectPath
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
