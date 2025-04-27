@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/hooks/use-toast';
@@ -156,6 +155,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(user);
       setIsAuthenticated(true);
       localStorage.setItem('campusflow_user', JSON.stringify(user));
+      
+      // Route to specific dashboard based on user role
+      switch(user.role) {
+        case 'student':
+          navigate('/student-dashboard');
+          break;
+        case 'faculty':
+          navigate('/faculty-dashboard');
+          break;
+        case 'admin':
+          navigate('/dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+      }
       
       toast({
         title: "Login successful",

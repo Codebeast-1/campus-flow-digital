@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,8 @@ import { AppProvider } from "./context/AppContext";
 import AppLayout from "./components/AppLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import FacultyDashboard from "./pages/FacultyDashboard";
 import Requests from "./pages/Requests";
 import RequestDetail from "./pages/RequestDetail";
 import NewRequest from "./pages/NewRequest";
@@ -51,6 +54,8 @@ const App = () => {
                 {/* Protected routes - requiring authentication */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/student-dashboard" element={<StudentDashboard />} />
+                  <Route path="/faculty-dashboard" element={<FacultyDashboard />} />
                   <Route path="/requests" element={<Requests />} />
                   <Route path="/requests/:id" element={<RequestDetail />} />
                   <Route path="/new-request" element={<NewRequest />} />
