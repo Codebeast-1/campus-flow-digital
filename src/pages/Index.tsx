@@ -1,10 +1,9 @@
-
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
 import { useEffect } from "react";
 
 const Index = () => {
-  const { isAuthenticated, currentUser } = useAppContext();
+  const { isAuthenticated } = useAppContext();
   const navigate = useNavigate();
   
   useEffect(() => {

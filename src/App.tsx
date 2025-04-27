@@ -1,10 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import AppLayout from "./components/AppLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -35,14 +34,14 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Public routes */}
+              {/* Public routes - outside AppLayout */}
+              <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
-              {/* App Layout with Sidebar */}
+              {/* Routes with AppLayout */}
               <Route element={<AppLayout />}>
-                {/* Public pages */}
-                <Route path="/" element={<LandingPage />} />
+                {/* Public pages that need the layout */}
                 <Route path="/ltcr" element={<LectureClassroomBooking />} />
                 <Route path="/halls" element={<HallBooking />} />
                 <Route path="/events" element={<EventBooking />} />
