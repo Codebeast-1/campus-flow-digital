@@ -14,7 +14,21 @@ import {
   SidebarMenuButton,
   SidebarGroup,
 } from "@/components/ui/sidebar";
-import { Bell, Calendar, Home, User, FileText, Settings, LogOut, GraduationCap, Building } from "lucide-react";
+import { 
+  Bell, 
+  Calendar, 
+  Home, 
+  User, 
+  FileText, 
+  Settings, 
+  LogOut, 
+  GraduationCap, 
+  Building,
+  BookOpen,
+  LayoutGrid,
+  Mail,
+  ArrowRight
+} from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 
 export default function AppLayout() {
@@ -51,7 +65,7 @@ export default function AppLayout() {
                 <div className="bg-campus-blue rounded-md p-1.5">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-xl font-bold">CampusFlow</span>
+                <span className="text-xl font-bold">DPMS</span>
               </div>
             </Link>
           </SidebarHeader>
@@ -69,6 +83,67 @@ export default function AppLayout() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/ltcr"
+                      className={`hover:scale-105 transition-all ${location.pathname === "/ltcr" ? "text-campus-blue font-medium" : ""}`}
+                    >
+                      <LayoutGrid className="h-5 w-5" />
+                      <span>LT/CR Booking</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/halls"
+                      className={`hover:scale-105 transition-all ${location.pathname === "/halls" ? "text-campus-blue font-medium" : ""}`}
+                    >
+                      <Building className="h-5 w-5" />
+                      <span>Hall Booking</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/events"
+                      className={`hover:scale-105 transition-all ${location.pathname === "/events" ? "text-campus-blue font-medium" : ""}`}
+                    >
+                      <Calendar className="h-5 w-5" />
+                      <span>Event Booking</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/booking-process"
+                      className={`hover:scale-105 transition-all ${location.pathname === "/booking-process" ? "text-campus-blue font-medium" : ""}`}
+                    >
+                      <BookOpen className="h-5 w-5" />
+                      <span>Booking Process</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/contact"
+                      className={`hover:scale-105 transition-all ${location.pathname === "/contact" ? "text-campus-blue font-medium" : ""}`}
+                    >
+                      <Mail className="h-5 w-5" />
+                      <span>Contact Us</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <Link
@@ -152,12 +227,23 @@ export default function AppLayout() {
           <div className="flex items-center h-14 border-b px-4 lg:px-6">
             <SidebarTrigger />
             <div className="ml-auto flex items-center space-x-4">
-              <Button 
-                variant="outline"
-                className="hover:scale-105 transition-transform"
-              >
-                Help
-              </Button>
+              {!currentUser && (
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    className="hover:scale-105 transition-transform"
+                    onClick={() => navigate('/auth')}
+                  >
+                    Login
+                  </Button>
+                  <Button 
+                    className="hover:scale-105 transition-transform"
+                    onClick={() => navigate('/auth?signup=true')}
+                  >
+                    Sign Up
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           <main className="flex-1 p-4 lg:p-6">

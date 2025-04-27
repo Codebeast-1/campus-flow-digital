@@ -1,18 +1,21 @@
 
-import { Navigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/AppContext";
+import { useEffect } from "react";
 
 const Index = () => {
-  const { isAuthenticated } = useAppContext();
-  const location = useLocation();
-
-  return (
-    <Navigate 
-      to={isAuthenticated ? "/" : "/auth"} 
-      state={{ from: location }} 
-      replace 
-    />
-  );
+  const { isAuthenticated, currentUser } = useAppContext();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+  
+  return null;
 };
 
 export default Index;
